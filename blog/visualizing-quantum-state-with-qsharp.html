@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Visualizing quantum state with Q#</title>
+    <link rel="stylesheet" href="../assets/theme.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+    <script defer src="../assets/katex.js"></script>
+
+    <script src="https://kit.fontawesome.com/581d6627e3.js" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <header>
+      <a href="../">Sarah Marshall</a>
+    </header>
+    <section class="content">
+      <h1>Visualizing quantum state with Q#</h1>
+<div class="date">
+  <time datetime="2019-12-16">December 16, 2019</time>
+</div>
+
+<p>A great thing you can do with quantum simulators that you can’t do with a real quantum computer is peek inside at the quantum state. Why would you want to do this? Well, often in the course of developing a quantum program, something goes wrong, and it’s helpful to inspect the quantum state to try to find where the problem is, much like you would add print statements to debug a classical program. Or perhaps nothing is wrong, but you want to trace the execution of a quantum algorithm for demonstration purposes.</p>
+<!-- more -->
+<p>When you want to look at the quantum state of a Q# program, the easiest way is to use <a href="https://docs.microsoft.com/en-us/qsharp/api/qsharp/microsoft.quantum.diagnostics.dumpmachine?view=qsharp-preview"><code>DumpMachine</code></a> or <a href="https://docs.microsoft.com/en-us/qsharp/api/qsharp/microsoft.quantum.diagnostics.dumpregister?view=qsharp-preview"><code>DumpRegister</code></a>. These functions show you a little table like this on the console:</p>
+<pre><code># wave function for qubits with ids (least to most significant): 0;1;2
+∣0❭:	 0.098409 + -0.025128 i	 == 	*                    [ 0.010316 ]      \+ [ -0.25000 rad ]
+∣1❭:	 0.165898 + -0.042361 i	 == 	*                    [ 0.029316 ]      \+ [ -0.25000 rad ]
+∣2❭:	 0.335400 + -0.085642 i	 == 	***                  [ 0.119828 ]      \+ [ -0.25000 rad ]
+∣3❭:	 0.565417 + -0.144375 i	 == 	*******              [ 0.340540 ]      \+ [ -0.25000 rad ]
+∣4❭:	 0.098409 +  0.025128 i	 == 	*                    [ 0.010316 ]      /- [  0.25000 rad ]
+∣5❭:	 0.165898 +  0.042361 i	 == 	*                    [ 0.029316 ]      /- [  0.25000 rad ]
+∣6❭:	 0.335400 +  0.085642 i	 == 	***                  [ 0.119828 ]      /- [  0.25000 rad ]
+∣7❭:	 0.565417 +  0.144375 i	 == 	*******              [ 0.340540 ]      /- [  0.25000 rad ]</code></pre>
+<p>This table is nice. It has all the information you could want to know about the state vector, and it’s easy to add a call to <code>DumpMachine</code> anywhere you want to know what the quantum state is at some particular point in your program. But it’s not especially convenient if you want to see how the state changes over time. You would end up with a bunch of separate tables printed out on the console and have to stitch them together on your own. Plus, it would be nice to have a more visually appealing way of showing the state vector that isn’t limited to console graphics.</p>
+<p>Let’s take this idea—printing a snapshot of the quantum state at specific points—and run with it. We can call <code>DumpMachine</code> continuously, after every step, and animate the transitions between states. We can also remember all of the previous states and show them in a timeline so you can jump back and forth, making it easy to compare the quantum state at any two points in time.</p>
+<figure>
+<img src="../assets/blog/state-visualizer/demo.gif" alt /><figcaption>Animated demo of the state visualizer</figcaption>
+</figure>
+<p>This is what the <a href="https://github.com/microsoft/Quantum/tree/master/samples/runtime/state-visualizer">Q# State Visualizer</a>, one of the samples in the in the <a href="https://github.com/microsoft/Quantum">Microsoft Quantum Development Kit samples</a> repository, does. I worked on it over the summer as part of my internship at Microsoft. This post doubles as a quick guide on how to use the state visualizer and an explanation of how it works.</p>
+<h2 id="setting-up-the-visualizer">Setting up the visualizer</h2>
+<p>The first step is to clone the <a href="https://github.com/microsoft/Quantum">QDK samples</a> repository and go to the <code>samples/runtime/state-visualizer</code> folder. There’s a <a href="https://github.com/microsoft/Quantum/blob/master/samples/runtime/state-visualizer/README.md">README</a> there that will tell you what you need to do to get started, but the gist of it is that the state visualizer is a web app, so you need <a href="https://nodejs.org/en/">Node.js</a> to build the front-end and <a href="https://dotnet.microsoft.com/download">.NET Core SDK</a> to run the back-end. Once you have the visualizer open in your web browser, you’re done with setup!</p>
+<h2 id="using-the-visualizer">Using the visualizer</h2>
+<p>The visualizer comes with an example that runs a quantum teleportation circuit followed by Grover’s search algorithm, so you can get started right away without having to use your own Q# program. But you can also run your own code by changing the <code>Program.qs</code> file to whatever you want—just restart the visualizer to run the new code!</p>
+<p>Here’s an overview of the visualizer’s features.</p>
+<figure>
+<img src="../assets/blog/state-visualizer/overview.png" alt /><figcaption>Numbered sections in the state visualizer’s UI</figcaption>
+</figure>
+<h3 id="navigation">1. Navigation</h3>
+<p>The buttons at the top of the screen are similar to what you would see in a debugger: you can either <em>step in</em> to the current operation and go through all of its calls to other operations one-by-one, or you can choose to <em>step over</em> them and skip straight to the operation that will run after the current operation finishes.</p>
+<p>There’s also one button that you don’t usually see in debuggers: a button that lets you go back to the <em>previous</em> operation so you can look at what the quantum state used to be.</p>
+<h3 id="timeline">2. Timeline</h3>
+<figure>
+<img src="../assets/blog/state-visualizer/timeline.png" alt /><figcaption>Timeline in the state visualizer</figcaption>
+</figure>
+<p>The timeline on the left side shows all of the operations that have finished, are currently running, or are about to start. The lists are nested so operations that are called by another operation are shown as indented below the parent operation. The blue arrow points to the operation that’s going to run next. When an operation returns something other than unit, the return value is shown after an equals sign.</p>
+<p>A neat feature of the timeline is that you can click on any operation in it to jump directly to the quantum state at that point in the program. This makes it really easy to see directly the differences in the quantum state between any two points in time.</p>
+<p>For technical reasons that I’ll explain in the next section, the timeline only shows Q# <a href="https://docs.microsoft.com/en-us/quantum/language/type-model?view=qsharp-preview#operation-and-function-types"><em>operations</em>, not functions</a>.</p>
+<h3 id="quantum-state">3. Quantum state</h3>
+<p>The largest part of the screen is taken up by the quantum state itself. It’s a bar chart that shows the amplitude of each basis vector, with the basis vector labels shown at the bottom. The real parts of the amplitude are red and the imaginary parts are blue. (The examples here happen to only have real amplitudes, so there are only red bars. Also, unlike <code>DumpMachine</code>, which has bars that show <em>probability</em> instead of probability amplitude, these bars can be negative, so the vertical axis ranges from -1 to +1.) You can mouse over a bar to see the its precise decimal value instead of relying on the tick marks.</p>
+<h2 id="behind-the-scenes">Behind the scenes</h2>
+<p>So how does the state visualizer work?</p>
+<p>The <a href="https://github.com/microsoft/qsharp-runtime/blob/master/src/Simulation/Common/SimulatorBase.cs">Q# quantum simulator</a> has several events that can be used to track the execution of a Q# program: <code>OnOperationStart</code>, <code>OnOperationEnd</code>, <code>OnAllocateQubits</code>, <code>OnBorrowQubits</code>, <code>OnReleaseQubits</code>, and <code>OnReturnQubits</code>. So the state visualizer runs a program using the quantum simulator, like you would normally, but with event handlers that wait for these events to happen. When they do, the event is sent to the web client along with a snapshot of the quantum state (made using the <a href="https://github.com/microsoft/qsharp-runtime/blob/master/src/Simulation/Simulators/QuantumSimulator/StateDumper.cs"><code>StateDumper</code></a> class), which the client then displays in the browser.</p>
+<p>A consequence of relying on the quantum simulator for events is that the state visualizer has no knowledge of finer-grained information that you might expect from a full-fledged debugger, like which functions are being called, which line of code is being executed, or non-quantum state like the values of local variables.</p>
+<h2 id="future-steps">Future steps</h2>
+<p>There are a couple directions you could go in to make the state visualizer better.</p>
+<p>The UI has some room for improvement. I can think of a few small changes that would be nice to have, like making the timeline resizable, or being able to collapse operations with children in the timeline. There could also be more options for how the quantum state is displayed, like showing probabilities instead of probability amplitudes, or even other kinds of visualizations besides a bar chart. The current visualization also uses color to distinguish between the real and imaginary parts, which may be an issue for users with color blindness.</p>
+<p>It would also be cool to add more debugger-like features to the visualizer (like the ones I mentioned in the previous section that aren’t possible with the current design). Instead of making the web app more like a debugger, it might be better to make Q# debuggers for existing IDEs that include state visualization.</p>
+<p>As always, feel free to fork the <a href="https://github.com/microsoft/Quantum">QDK samples</a> repository and submit pull requests for the state visualizer if you’ve made any improvements!</p>
+<hr />
+<p>This post is part of the <a href="https://devblogs.microsoft.com/qsharp/q-advent-calendar-2019/">2019 Q# Advent Calendar</a>.</p>
+
+<div id="disqus_thread"></div>
+<script>
+  var disqus_config = function () {
+    this.page.url = "https://www.sarahmarshall.name/blog/visualizing-quantum-state-with-qsharp.html";
+    this.page.identifier = "https://www.sarahmarshall.name/blog/visualizing-quantum-state-with-qsharp.html";
+  };
+
+  (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://sarah-marshall.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    </section>
+    <footer>
+      <div>
+        <p class="author">Sarah Marshall</p>
+        <dl>
+          <dt><span class="fas fa-envelope"><span>Email</span></span></dt>
+          <dd><a href="mailto:sarah@sarahmarshall.name" title="Email">sarah@sarahmarshall.name</a></dd>
+          <dt><span class="fab fa-github"><span>GitHub</span></span></dt>
+          <dd><a href="https://github.com/samarsha" title="GitHub">samarsha</a></dd>
+          <dt><span class="fab fa-linkedin"><span>Linked In</span></span></dt>
+          <dd><a href="https://www.linkedin.com/in/smarsha/" title="LinkedIn">smarsha</a></dd>
+        </dl>
+        <p>I'm a software engineer at Microsoft Quantum working on the compiler and runtime for Q#, a quantum programming language.</p>
+      </div>
+    </footer>
+  </body>
+</html>

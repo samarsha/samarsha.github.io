@@ -1,0 +1,228 @@
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,700;0,900;1,400&display=swap");
+
+@import url("code.css");
+
+/* Basic Elements */
+
+body {
+    background-color: #eeeeee;
+    color: #444444;
+    font-family: "Nunito", sans-serif;
+    font-size: 14pt;
+    margin: 0;
+    text-align: justify;
+}
+body > * > * {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 950px;
+    padding: 0 25px;
+}
+
+header, footer {
+    background-color: #2a333f;
+    color: #dddddd;
+}
+
+h1 {
+    font-size: 28pt;
+}
+
+a {
+    color: #5d7caa;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+a:visited {
+    color: #8694aa;
+}
+
+img {
+    max-width: 100%;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    padding-bottom: 5px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 5px;
+}
+
+th:first-child, td:first-child {
+    padding-left: 0;
+}
+
+th:last-child, td:last-child {
+    padding-right: 0;
+}
+
+td {
+    border-color: #cccccc;
+    border-style: solid;
+    border-width: 1px 0 0 0;
+}
+
+.date {
+    color: #999999;
+    margin-bottom: 40px;
+    margin-top: -20px;
+}
+
+.fab > span, .fas > span {
+    display: none;
+}
+
+#disqus_thread {
+    margin-top: 40px;
+}
+
+/* Header */
+
+header {
+    margin-bottom: 50px;
+}
+header a {
+    color: #dddddd;
+    display: block;
+    font-size: 46pt;
+    padding-bottom: 30px;
+    padding-top: 30px;
+    position: relative;
+    text-decoration: none;
+}
+header a:visited {
+    color: inherit;
+}
+header a:before {
+    content: ">>=";
+    font-family: "Fira Code", monospace;
+    position: absolute;
+    right: 100%;
+}
+
+/* Full-Width Elements */
+
+div.sourceCode, pre:not(.sourceCode), figure {
+    max-width: none;
+}
+
+pre.sourceCode, pre:not(.sourceCode) > code, figcaption {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 950px;
+}
+
+/* Teasers */
+
+.teaser {
+    position: relative;
+    transition-duration: 0.2s;
+    transition-property: opacity;
+}
+.teaser:hover {
+    opacity: 0.7;
+}
+.teaser .overlay {
+    background-image: linear-gradient(to bottom, transparent 75%, #eeeeee 99%);
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+.teaser .date {
+    margin-bottom: 0;
+}
+
+/* Figures */
+
+figure {
+    padding-left: 0;
+    padding-right: 0;
+    text-align: center;
+}
+figure.cover {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+figcaption {
+    color: #999999;
+    font-style: italic;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* Code */
+
+code, pre {
+    font-family: "Fira Code", monospace;
+}
+
+pre:not(.sourceCode), code:not(.sourceCode) {
+    background-color: #f8f8f8;
+    border-radius: 5px;
+}
+
+pre, pre:not(.sourceCode) > code {
+    overflow-x: auto;
+}
+
+pre.sourceCode, pre:not(.sourceCode) > code {
+    padding: 10px;
+}
+
+code:not(.sourceCode) {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+/* Footer */
+
+footer {
+    margin-top: 40px;
+    padding-bottom: 30px;
+    padding-top: 30px;
+}
+footer .author {
+    font-size: 24pt;
+    font-weight: bold;
+}
+footer dt, dd {
+    line-height: 25pt;
+}
+footer dt {
+    clear: left;
+    float: left;
+}
+footer dd {
+    margin-left: 30px;
+}
+
+@media (min-width: 900px) {
+    footer > div {
+        align-items: center;
+        display: flex;
+    }
+    footer > div > * {
+        flex-basis: 0;
+        flex-grow: 1;
+        flex-shrink: 1;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    footer > div > *:first-child {
+        padding-left: 0;
+    }
+    footer > div > *:last-child {
+        padding-right: 0;
+    }
+}
