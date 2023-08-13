@@ -1,0 +1,9 @@
+title: Sarah Marshall
+description: Software Engineer at Microsoft
+
+plugins:
+  - jekyll-remote-theme
+
+remote_theme: jekyll/minima
+minima:
+  skin: dark
